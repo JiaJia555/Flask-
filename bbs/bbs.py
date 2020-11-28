@@ -6,12 +6,17 @@ from exts import db
 from apps.cms.views import cms_bp
 from apps.front.views import front_bp
 import config
+from flask_wtf import CSRFProtect
+
 
 # 前台 front
 # 后台 cms  用户模型
 # 共有的 common
 
 app = Flask(__name__)
+
+CSRFProtect(app)
+
 app.config.from_object(config)
 
 db.init_app(app)
