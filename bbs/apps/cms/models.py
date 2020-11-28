@@ -5,6 +5,53 @@ from exts import db
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 
+
+class CMSPersmission(object):
+    # 255二进制来表示所有的权限
+    ALL_PERMISSION  = 0b11111111
+
+    # 访问权限
+    VISITOR         = 0b00000001
+
+    # 管理帖子权限
+    POSTER          = 0b00000010
+
+    # 管理评论
+    COMMENTER       = 0b00000100
+
+    # 管理板块
+    BOARDER         = 0b00001000
+
+    # 管理前台用户
+    FRONTUSER       = 0b00010000
+
+    # 管理后台用户
+    CMSUSER         = 0b00100000
+
+    # 管理管理员用户
+    ADMINER         = 0b01000000
+
+
+cms_role_user = db.Table(
+    'cms_role_user',
+    db.Column('cms_role_id', db.Integer, db.ForeignKey('cms_role.id'), primary_key=True),
+    db.Column('cms_user_id', db.Integer, db.ForeignKey('cms_user.id'), primary_key=True),
+)
+
+
+# 角色
+class CMSRole(db.Model):
+    __tablename__ = 'cms_role'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(50), nullable=False)
+    desc = db.Column(db.String(200), nullable=False)
+    create_time = db.Column(db.DateTime, default=datetime.now)
+    permissions = db.Column(db.Integer, default=CMSPersmission.VISITOR)
+
+    users = db.relationship('CMSUser', secondary=cms_role_user, backref='roles')
+
+
+
 class CMSUser(db.Model):
     __tablename__ = 'cms_user'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

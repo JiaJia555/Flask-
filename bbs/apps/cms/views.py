@@ -13,10 +13,12 @@ from flask import (
     g
 )
 
-from apps.cms.forms import LoginForm, ResetPwdForm
+from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm
 from apps.cms.models import CMSUser
-from exts import db
-from utils import restful
+from exts import db, mail
+from utils import restful, random_captcha, lgcache
+from flask_mail import Message
+
 
 from .decorators import login_required
 
@@ -113,10 +115,50 @@ class ResetEmailView(views.MethodView):
         return render_template('cms/cms_resetemail.html')
 
     def post(self):
-        pass
+        form = ResetEmailForm(request.form)
+        if form.validate():
+            email = form.email.data
+            # 查询数据库
+            # CMSUser.query.filter_by(email=email).first()
+            # CMSUser.query.filter(CMSUser.email==email).first()
+
+            g.cms_user.email = email
+            db.session.commit()
+            return restful.success()
+
+        else:
+            return restful.params_errors(form.get_error())
+
+# 发送邮件
+@cms_bp.route("/send_mail/")
+def send_mail():
+    message = Message('邮件发送', recipients=['2705185834@qq.com'], body='测试邮件发送')
+    mail.send(message)
+    return '邮件已发送'
+
+
+# 邮件发送
+class EmailCaptcha(views.MethodView):
+    def get(self):
+        email = request.args.get('email')
+        if not email:
+            return restful.params_errors('请传递邮箱参数')
+
+        # 发送邮件  内容发送一个验证码 4 6 数字和英文组合
+        captcha = random_captcha.get_random_captcha(4)
+        message = Message('逻辑论坛邮箱验证码', recipients=[email], body='您的验证码是 %s' % captcha)
+        try:
+            mail.send(message)
+        except:
+            return restful.server_errors()
+
+        # 验证码 保存下来 MySQL 过期时间  Redis 效率  key email value captcha
+        lgcache.redis_set(email, captcha)
+        return restful.success()
 
 
 cms_bp.add_url_rule("/login/", view_func=LoginView.as_view('login'))
 cms_bp.add_url_rule("/resetpwd/", view_func=ResetPwdView.as_view('resetpwd'))
 cms_bp.add_url_rule("/resetemail/", view_func=ResetEmailView.as_view('resetemail'))
+cms_bp.add_url_rule("/email_captcha/", view_func=EmailCaptcha.as_view('email_captcha'))
 

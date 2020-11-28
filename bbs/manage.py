@@ -5,7 +5,7 @@ from bbs import app
 from flask_migrate import Migrate, MigrateCommand
 from exts import db
 # 导入模型
-from apps.cms.models import CMSUser
+from apps.cms.models import CMSUser, CMSRole
 
 
 manager = Manager(app)
