@@ -22,8 +22,8 @@ class SMSCaptchaForm(Form):
         # 服务端加密之后生成的
         sign2 = hashlib.md5((timestamp + telephone + 'q3423805gdflvbdfvhsdoa`#$%').encode('utf-8')).hexdigest()
 
-        print("客户端sign %s" % sign)
-        print("服务端sign %s" % sign2)
+        # print("客户端sign %s" % sign)
+        # print("服务端sign %s" % sign2)
 
         if sign == sign2:
             return True

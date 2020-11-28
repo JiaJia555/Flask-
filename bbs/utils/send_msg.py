@@ -10,6 +10,7 @@ def send_mobile_msg(mobile, code):
     clnt = YunpianClient('e8abe129a4e9f9a7c8c9adc8ece9ebc9')
     param = {YC.MOBILE: mobile, YC.TEXT: '【于成令】您的验证码是{}'.format(code)}
     r = clnt.sms().single_send(param)
+    # print(r.data())
     return r.code()
 
 # 0 发送成功

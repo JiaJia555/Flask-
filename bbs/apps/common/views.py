@@ -5,6 +5,7 @@ from utils import send_msg, restful
 from flask import Blueprint, request
 from utils.captcha import Captcha
 from .forms import SMSCaptchaForm
+from utils import lgcache
 
 
 common_bp = Blueprint("common", __name__, url_prefix='/c')
@@ -31,7 +32,14 @@ def sms_captcha():
     form = SMSCaptchaForm(request.form)
 
     if form.validate():
-        return restful.success()
+        telephone = form.telephone.data
+        captcha = Captcha.gene_text(number=4)
+        # print("发送的验证码{}".format(captcha))
+        if send_msg.send_mobile_msg(telephone, captcha) == 0:
+            lgcache.redis_set(telephone, captcha)
+            return restful.success()
+        else:
+            return restful.params_errors(message='发送失败')
 
     else:
         return restful.params_errors(message='参数错误')
