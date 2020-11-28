@@ -14,13 +14,12 @@ from flask import (
 )
 
 from apps.cms.forms import LoginForm, ResetPwdForm, ResetEmailForm
-from apps.cms.models import CMSUser
+from apps.cms.models import CMSUser, CMSPersmission
 from exts import db, mail
 from utils import restful, random_captcha, lgcache
 from flask_mail import Message
 
-
-from .decorators import login_required
+from .decorators import login_required, permission_required
 
 cms_bp = Blueprint("cms", __name__, url_prefix='/cms')
 from .hooks import before_request
@@ -155,6 +154,40 @@ class EmailCaptcha(views.MethodView):
         # 验证码 保存下来 MySQL 过期时间  Redis 效率  key email value captcha
         lgcache.redis_set(email, captcha)
         return restful.success()
+
+
+@cms_bp.route("/posts/")
+@permission_required(CMSPersmission.POSTER)
+def posts():
+    return render_template("cms/cms_posts.html")
+
+
+@cms_bp.route("/comments/")
+@permission_required(CMSPersmission.COMMENTER)
+def comments():
+    return render_template("cms/cms_comments.html")
+
+
+@cms_bp.route("/boards/")
+# @permission_required(CMSPersmission.BOARDER)
+def boards():
+    return render_template("cms/cms_boards.html")
+
+
+@cms_bp.route("/fusers/")
+def fusers():
+    return render_template("cms/cms_fusers.html")
+
+
+@cms_bp.route("/cusers/")
+def cusers():
+    return render_template("cms/cms_cusers.html")
+
+
+@cms_bp.route("/croles/")
+def croles():
+    return render_template("cms/cms_croles.html")
+
 
 
 cms_bp.add_url_rule("/login/", view_func=LoginView.as_view('login'))
