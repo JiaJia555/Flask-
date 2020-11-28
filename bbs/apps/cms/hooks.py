@@ -20,5 +20,6 @@ def before_request():
     if 'user_id' in session:
         user_id = session.get('user_id')
         user = CMSUser.query.get(user_id)
+        # print(CMSUser.query.filter(CMSUser.email == 'admin@qq.com').first())
         if user:
             g.cms_user = user

@@ -33,8 +33,8 @@ $(function () {
                 $.ajaxSetup({
                     'beforeSend':function(xhr,settings) {
                         if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
-//                            var csrftoken = $('meta[name=csrf-token]').attr('content');
-                            var csrftoken = $('input[name=csrf-token]').attr('value');
+                            var csrftoken = $('meta[name=csrf-token]').attr('content');
+//                            var csrftoken = $('input[name=csrf-token]').attr('value');
                             xhr.setRequestHeader("X-CSRFToken", csrftoken)
                         }
                     }
@@ -42,6 +42,11 @@ $(function () {
             }
         };
 
+        // 表单提交 方法  post 提交
+        // 表单发送的地址
+        // data 数据
+        // success
+        // fail
         lgajax.post({
             'url': '/cms/resetpwd/',
             'data': {
@@ -50,10 +55,20 @@ $(function () {
                 'newpwd2': newpwd2
             },
             'success': function (data) {
-                console.log(data);
+                // console.log(data);
+                if(data['code'] == 200){
+                    lgalert.alertSuccess('密码修改成功')
+                    oldpwd.val("")
+                    newpwd.val("")
+                    newpwd2.val("")
+                }else{
+                    var message = data['message']
+                    lgalert.alertInfo(message)
+                }
             },
             'fail': function (error) {
-                console.log(error);
+                // console.log(error);
+                lgalert.alertNetworkError();
             }
         });
     });

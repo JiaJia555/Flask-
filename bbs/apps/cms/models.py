@@ -18,7 +18,6 @@ class CMSUser(db.Model):
         self.password = password
         self.email = email
 
-
     @property
     def password(self):
         return self._password
